@@ -1,0 +1,22 @@
+<div class="card">
+  <div class="card-content">
+    <span class="card-title">Machine-readable formats</span>
+    <p>This term is available in Turtle format:</p>
+    
+    <div class="section">
+      <h5>Turtle</h5>
+      <p>Access the Turtle (.ttl) representation using one of these methods:</p>
+      
+      <h6>Direct Link</h6>
+      <p><a href="/terms/{{ objName }}.ttl" class="btn waves-effect waves-light blue-grey lighten-1">View as Turtle</a></p>
+      <pre><code class="language-bash">curl https://oerschema.org/terms/{{ objName }}.ttl</code></pre>
+      
+      <h6>URL Parameter</h6>
+      <p>Append <code>?format=ttl</code> to the term URL:</p>
+      <pre><code class="language-bash">curl https://oerschema.org/{{ objName }}?format=ttl</code></pre>
+      
+      <p class="note"><i class="material-icons tiny">info</i> Note: While true content negotiation (using Accept headers) is not available on GitHub Pages, 
+      you can access the Turtle representation using either the direct link above or the URL parameter approach.</p>
+    </div>
+  </div>
+</div>

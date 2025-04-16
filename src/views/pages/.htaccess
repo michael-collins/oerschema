@@ -1,0 +1,20 @@
+Options +FollowSymLinks
+RewriteEngine On
+
+# Set environment variable for content type
+RewriteCond %{HTTP:Accept} text/turtle
+RewriteRule .* - [E=CONTENT_TYPE:turtle]
+
+# Redirect requests with turtle Accept header to .ttl files
+RewriteCond %{ENV:CONTENT_TYPE} turtle
+RewriteRule ^([^/]+)/?$ /terms/$1.ttl [L]
+
+# If no specific content type is requested, use HTML (.html)
+RewriteCond %{ENV:CONTENT_TYPE} !turtle
+RewriteRule ^([^/]+)/?$ /$1/index.html [L]
+
+# Set correct content type for Turtle files
+<Files ~ "\.ttl$">
+    ForceType text/turtle
+    Header set Access-Control-Allow-Origin "*"
+</Files>

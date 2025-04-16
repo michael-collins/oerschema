@@ -25,6 +25,24 @@ Modify `oerschema/src/config/schema.yml` and create a pull request for evaluatio
 2. Add a folder to  `/src/views/samples` with the name of the class.
 3. Inside the class folder, create any of the following sample usage files: `default.html`, `jsonld.html`, `microdata.html`, `rdfa.html`
 
+## Machine-readable formats
+
+OER Schema vocabulary terms are available in both human-readable HTML and machine-readable Turtle format:
+
+- **HTML format**: Available by navigating to the term in a browser (e.g., `https://oerschema.org/courseIdentifier`)
+- **Turtle format**: Available through two methods:
+  - Direct file access by appending `.ttl` to the term path in the `/terms` directory (e.g., `https://oerschema.org/terms/courseIdentifier.ttl`)
+  - URL parameter approach by adding `?format=ttl` to the term URL (e.g., `https://oerschema.org/courseIdentifier?format=ttl`)
+
+Example usage with curl:
+```bash
+# Get Turtle representation of a term (direct file access)
+curl https://oerschema.org/terms/courseIdentifier.ttl
+
+# Get Turtle representation using URL parameter
+curl https://oerschema.org/courseIdentifier?format=ttl
+```
+
 ## Updating OERSchema.org wesbite:
 
 - Twig templates and pages directory: `oerschema/src/views/`

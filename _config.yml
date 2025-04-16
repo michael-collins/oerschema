@@ -1,0 +1,23 @@
+# GitHub Pages configuration
+
+# Specify which files should be processed by Jekyll
+include:
+  - "*.html"
+  - "*.xml"
+
+# Exclude files from processing
+exclude:
+  - "node_modules"
+  - "src"
+  - "gulpfile.mjs"
+  - "package.json"
+  - "package-lock.json"
+  - "bower.json"
+  - ".travis.yml"
+
+# Set default MIME types for custom extensions
+defaults:
+  - scope:
+      path: "terms/*.ttl"
+    values:
+      content_type: "text/turtle"

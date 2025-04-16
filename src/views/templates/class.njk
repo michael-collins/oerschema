@@ -28,5 +28,7 @@
         {{ macros.schema_code_samples(objName) }}
         <h2 class="h5">More specific Types</h2>
         {{ macros.schema_class_dependencies(objName, schema) }}
+        
+        {% include "templates/conneg-info.njk" %}
     </div>
 {% endblock %}

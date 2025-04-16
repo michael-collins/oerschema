@@ -171,11 +171,27 @@ function turtle(done) {
     });
 }
 
+function configFiles() {
+    return gulp.src('./_config.yml')
+        .pipe(gulp.dest('./dist'));
+}
+
+function htaccess() {
+    return gulp.src('./src/views/pages/.htaccess')
+        .pipe(gulp.dest('./dist'));
+}
+
 function watch() {
     gulp.watch('./src/scss/**/*.scss', styles);
     gulp.watch('./src/js/*.js', js);
     gulp.watch('./src/config/**/*.yml', template);
-    gulp.watch('./src/views/**/*.njk', template);
+    // Exclude automatically generated class and property files to avoid recursion
+    gulp.watch([
+        './src/views/**/*.njk', 
+        '!./src/views/pages/**/index.njk', // Exclude generated index.njk files
+        './src/views/pages/index.njk', // But include the main index.njk
+        './src/views/pages/docs/**/*.njk' // And include documentation pages
+    ], template);
 }
 
 function browserSyncServer() {
@@ -191,11 +207,11 @@ const assets = gulp.parallel(styles, js, fonts, images);
 const build = gulp.series(
   resetSchema,
   buildSchema,
-  gulp.parallel(styles, js, fonts, images, buildTemplates, turtle)
+  gulp.parallel(styles, js, fonts, images, buildTemplates, turtle, htaccess, configFiles)
 );
 
 // Export build along with existing tasks
-export { resetSchema, buildSchema, template, build };
+export { resetSchema, buildSchema, template, build, htaccess, configFiles };
 
 // Other exports remain unchanged
 export const clearSchema = resetSchema;
