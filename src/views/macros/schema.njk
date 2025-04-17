@@ -1,6 +1,6 @@
 {% macro schema_class_table(class, schema, inTable=false) %}
     {%- if not inTable %}
-        <table class="class-table schema-table striped">
+        <table class="table table-zebra w-full">
             <thead>
                 <tr>
                     <th>Property</th>
@@ -11,26 +11,26 @@
     {%- endif %}
         <tbody class="subclass">
         <tr>
-            <th colspan="3">
+            <th colspan="3" class="bg-base-200">
                 <link property="rdfs:subClassOf" href="http://oerschema.org/{{ class.label }}">
                 {%- if class.baseVocab %}
                     <link property="rdfs:subClassOf" href="{{ class.baseVocab }}{{ class.label }}">
                 {%- endif %}
-                Properties of <a href="/{{ class.label }}">{{ class.label }}</a>
+                Properties of <a href="/{{ class.label }}" class="link link-primary">{{ class.label }}</a>
             </th>
         </tr>
         {%- if class.properties %}
             {%- for name in class.properties %}
                 {% set property = schema.properties[name] %}
                 <tr typeof="rdfs:Property" resource="http://oerschema.org/{{ name }}/">
-                    <td class="property-label" property="rdfs:label"><a href="/{{ name }}">{{ name }}</a></td>
+                    <td class="property-label" property="rdfs:label"><a href="/{{ name }}" class="link link-primary">{{ name }}</a></td>
                     <td class="property-range">
                         {%- for range in property.range|sort %}
                             <link property="rangeIncludes" href="http://oerschema.org/{{ range }}">
                             {%- if class.baseVocab %}
                                 <link property="rangeIncludes" href="{{ class.baseVocab }}{{ range }}">
                             {%- endif %}
-                            <a href="/{{ range }}/">{{ range }}</a> {{ "or" if not loop.last }}
+                            <a href="/{{ range }}/" class="link link-primary">{{ range }}</a> {{ "or" if not loop.last }}
                         {%- endfor %}
                     </td>
                     <td class="property-comment" property="rdfs:comment">{{ property.comment }}</td>
@@ -47,13 +47,13 @@
                 {%- else %}
                     <tbody>
                         <tr>
-                            <th colspan="3">
+                            <th colspan="3" class="bg-base-200">
                                 <link property="rdfs:subClassOf" href="{{ subClass }}">
                                 Extends class
                                 {% if subClass|match('/^https?:\/\//') %}
-                                    <a href="{{ subClass}}" target="_blank"><b>{{ subClass }}</b></a>
+                                    <a href="{{ subClass}}" target="_blank" class="link link-primary font-bold">{{ subClass }}</a>
                                 {% else %}
-                                    <b>{{ subClass }}</b>
+                                    <span class="font-bold">{{ subClass }}</span>
                                 {% endif %}
                             </th>
                         </tr>
@@ -79,14 +79,15 @@
         {%- endfor %}
     {%- elif rendered|length > 0 -%}
         {%- for sc in rendered|reverse %}
-            <a href="/{{ sc }}" class="breadcrumb">{{ sc }}</a>
+            <a href="/{{ sc }}" class="text-primary-content hover:text-primary">{{ sc }}</a>
+            {% if not loop.last %} > {% endif %}
         {%- endfor %}
     {%- endif %}
 {% endmacro %}
 
 {% macro schema_property_breadcrumbs(property, schema) %}
     {{ schema_class_breadcrumbs(schema.classes['Property'], schema) }}
-    <a href="/{{ property.label }}" class="breadcrumb">{{ property.label }}</a>
+    > <a href="/{{ property.label }}" class="text-primary-content hover:text-primary">{{ property.label }}</a>
 {% endmacro %}
 
 {% macro schema_class_dependencies(className, schema) %}
@@ -96,9 +97,9 @@
             {% set list = list|merge([name])|sort %}
         {% endif %}
     {% endfor %}
-    <ul>
+    <ul class="list-disc pl-6">
         {% for item in list %}
-            <li><a href="/{{ item }}">{{ item }}</a></li>
+            <li><a href="/{{ item }}" class="link link-primary">{{ item }}</a></li>
         {% else %}
             <li><em>This is the most specific of this type.</em></li>
         {% endfor %}
@@ -114,10 +115,10 @@
         {%- endif -%}
     {%- endfor -%}
     {%- if not list|empty -%}
-        <ul class="schema-tree">
+        <ul class="schema-tree list-none pl-4 border-l border-gray-300">
             {%- for item in list -%}
-                <li>
-                    <a href="/{{ item }}">{{ item }}</a>
+                <li class="py-1">
+                    <a href="/{{ item }}" class="link link-primary">{{ item }}</a>
                     {{ schema_class_tree(schema, seed=item) }}
                 </li>
             {%- endfor -%}
@@ -132,7 +133,7 @@
             {% set list = list|merge([name])|sort %}
         {% endif %}
     {%- endfor %}
-    <table class="schema-table properties-table striped">
+    <table class="table table-zebra w-full">
         <thead>
             <tr>
                 <th>Property</th>
@@ -145,12 +146,12 @@
                 {% set property = schema.properties[item] %}
                 <tr>
                     <td>
-                        <a href="/{{ item }}">{{ item }}</a>
+                        <a href="/{{ item }}" class="link link-primary">{{ item }}</a>
                     </td>
                     <td>
                         {%- for class in property.domain|sort %}
                             {%- if not class|match('/.+:.*.') %}
-                                <a href="/{{ class }}">{{ class }}</a><br>
+                                <a href="/{{ class }}" class="link link-primary">{{ class }}</a><br>
                             {%- endif %}
                         {%- endfor %}
                     </td>
@@ -160,7 +161,7 @@
                 </tr>
             {%- else %}
                 <tr>
-                    <td class="center-align" colspan="3"><em>This type hasn't been used on any properties, yet.</em></td>
+                    <td class="text-center" colspan="3"><em>This type hasn't been used on any properties, yet.</em></td>
                 </tr>
             {%- endfor %}
         </tbody>
@@ -168,34 +169,53 @@
 {% endmacro %}
 
 {% macro schema_code_samples(className) %}
-    <div class="row">
-        <div class="col s12">
-            <ul class="tabs">
-                <li class="tab col s3"><a href="#default" class="active">Without Markup</a></li>
-                <li class="tab col s3"><a href="#rdfa">HTML5+RDFa</a></li>
-                <li class="tab col s3"><a href="#micro">Microdata</a></li>
-                <li class="tab col s3"><a href="#jsonld">JSON+LD</a></li>
-            </ul>
+    <div class="flex flex-col">
+        <div class="tabs tabs-boxed mb-4">
+            <a href="#" class="tab tab-active" onclick="showTab('default'); return false;">Without Markup</a>
+            <a href="#" class="tab" onclick="showTab('rdfa'); return false;">HTML5+RDFa</a>
+            <a href="#" class="tab" onclick="showTab('micro'); return false;">Microdata</a>
+            <a href="#" class="tab" onclick="showTab('jsonld'); return false;">JSON+LD</a>
         </div>
-        <div id="default" class="col s12">
+        
+        <div id="default-tab" class="tab-content">
             {%- code "html" %}
                 {%- include "samples/" + className + "/default.html" ignore missing -%}
             {%- endcode %}
         </div>
-        <div id="rdfa" class="col s12">
+        <div id="rdfa-tab" class="tab-content hidden">
             {%- code "html" %}
                 {%- include "samples/" + className + "/rdfa.html" ignore missing -%}
             {%- endcode %}
         </div>
-        <div id="micro" class="col s12">
+        <div id="micro-tab" class="tab-content hidden">
             {%- code "html" %}
                 {%- include "samples/" + className + "/microdata.html" ignore missing -%}
             {%- endcode %}
         </div>
-        <div id="jsonld" class="col s12">
+        <div id="jsonld-tab" class="tab-content hidden">
             {%- code "html" %}
                 {%- include "samples/" + className + "/jsonld.html" ignore missing -%}
             {%- endcode %}
         </div>
     </div>
+
+    <script>
+    function showTab(tabName) {
+        // Hide all tab contents
+        document.querySelectorAll('.tab-content').forEach(tab => {
+            tab.classList.add('hidden');
+        });
+        
+        // Remove active class from all tabs
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.classList.remove('tab-active');
+        });
+        
+        // Show the selected tab content
+        document.getElementById(tabName + '-tab').classList.remove('hidden');
+        
+        // Add active class to the clicked tab
+        document.querySelector(`.tab[onclick*="${tabName}"]`).classList.add('tab-active');
+    }
+    </script>
 {% endmacro %}

@@ -78,7 +78,8 @@ env.addExtension('NunjucksCodeHighlight', highlight)
 
 // Updated styles function to process Tailwind CSS with proper error handling
 function styles() {
-    return gulp.src('./src/scss/tailwind.css')
+    return gulp.src('./src/scss/style.scss')
+        .pipe(scss().on('error', scss.logError))
         .pipe(postcss([
             tailwindcss,
             autoprefixer
@@ -88,7 +89,7 @@ function styles() {
             this.emit('end');
         })
         .pipe(cleancss())
-        .pipe(rename({ basename: "style", extname: ".min.css" }))
+        .pipe(rename({ extname: ".min.css" }))
         .pipe(gulp.dest('./dist/assets/css/'));
 }
 

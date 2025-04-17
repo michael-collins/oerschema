@@ -1,45 +1,45 @@
-<div class="card">
-  <div class="card-content">
-    <span class="card-title">Machine-readable formats</span>
+<div class="card bg-base-100 shadow-lg">
+  <div class="card-body">
+    <h3 class="card-title">Machine-readable formats</h3>
     <p>This term is available in the following machine-readable formats:</p>
     
-    <div class="section">
-      <h5>Turtle</h5>
+    <div class="py-4">
+      <h5 class="text-lg font-semibold mb-2">Turtle</h5>
       <p>Access the Turtle (.ttl) representation:</p>
       
-      <p><a href="/terms/{{ objName }}.ttl" class="btn waves-effect waves-light blue-grey lighten-1">View as Turtle</a></p>
+      <p><a href="/terms/{{ objName }}.ttl" class="btn btn-secondary btn-sm">View as Turtle</a></p>
       <pre><code class="language-bash">curl https://oerschema.org/terms/{{ objName }}.ttl</code></pre>
     </div>
     
-    <div class="section">
-      <h5>JSON-LD</h5>
+    <div class="py-4">
+      <h5 class="text-lg font-semibold mb-2">JSON-LD</h5>
       <p>Access the JSON-LD representation:</p>
       
-      <p><a href="/terms/{{ objName }}.jsonld" class="btn waves-effect waves-light blue-grey lighten-1">View as JSON-LD</a></p>
+      <p><a href="/terms/{{ objName }}.jsonld" class="btn btn-secondary btn-sm">View as JSON-LD</a></p>
       <pre><code class="language-bash">curl https://oerschema.org/terms/{{ objName }}.jsonld</code></pre>
     </div>
     
-    <div class="section">
-      <h5>RDF/XML</h5>
+    <div class="py-4">
+      <h5 class="text-lg font-semibold mb-2">RDF/XML</h5>
       <p>Access the RDF/XML (.rdf) representation:</p>
       
-      <p><a href="/terms/{{ objName }}.rdf" class="btn waves-effect waves-light blue-grey lighten-1">View as RDF/XML</a></p>
+      <p><a href="/terms/{{ objName }}.rdf" class="btn btn-secondary btn-sm">View as RDF/XML</a></p>
       <pre><code class="language-bash">curl https://oerschema.org/terms/{{ objName }}.rdf</code></pre>
     </div>
     
-    <div class="section">
-      <h5>N-Triples</h5>
+    <div class="py-4">
+      <h5 class="text-lg font-semibold mb-2">N-Triples</h5>
       <p>Access the N-Triples (.nt) representation:</p>
       
-      <p><a href="/terms/{{ objName }}.nt" class="btn waves-effect waves-light blue-grey lighten-1">View as N-Triples</a></p>
+      <p><a href="/terms/{{ objName }}.nt" class="btn btn-secondary btn-sm">View as N-Triples</a></p>
       <pre><code class="language-bash">curl https://oerschema.org/terms/{{ objName }}.nt</code></pre>
     </div>
     
-    <div class="section">
-      <h5>Content Negotiation</h5>
-      <p>OER Schema supports <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Content_negotiation" target="_blank">HTTP content negotiation</a>. You can request different representations of this term by specifying the appropriate Accept header:</p>
+    <div class="py-4">
+      <h5 class="text-lg font-semibold mb-2">Content Negotiation</h5>
+      <p>OER Schema supports <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Content_negotiation" target="_blank" class="link link-primary">HTTP content negotiation</a>. You can request different representations of this term by specifying the appropriate Accept header:</p>
       
-      <h6>Examples:</h6>
+      <h6 class="font-medium mt-4 mb-2">Examples:</h6>
       
       <p>Request Turtle format:</p>
       <pre><code class="language-bash">curl -LH "Accept: text/turtle" https://oerschema.org/{{ objName }}</code></pre>
@@ -54,14 +54,14 @@
       <pre><code class="language-bash">curl -LH "Accept: application/n-triples" https://oerschema.org/{{ objName }}</code></pre>
     </div>
 
-    <div class="section">
-      <h5>Complete Vocabulary</h5>
+    <div class="py-4">
+      <h5 class="text-lg font-semibold mb-2">Complete Vocabulary</h5>
       <p>The complete vocabulary is available in various formats at the following URLs:</p>
-      <ul>
-        <li><a href="/schema.ttl">Turtle (.ttl)</a></li>
-        <li><a href="/schema.jsonld">JSON-LD (.jsonld)</a></li>
-        <li><a href="/schema.rdf">RDF/XML (.rdf)</a></li>
-        <li><a href="/schema.nt">N-Triples (.nt)</a></li>
+      <ul class="list-disc pl-6 mt-2">
+        <li><a href="/schema.ttl" class="link link-primary">Turtle (.ttl)</a></li>
+        <li><a href="/schema.jsonld" class="link link-primary">JSON-LD (.jsonld)</a></li>
+        <li><a href="/schema.rdf" class="link link-primary">RDF/XML (.rdf)</a></li>
+        <li><a href="/schema.nt" class="link link-primary">N-Triples (.nt)</a></li>
       </ul>
     </div>
   </div>
