@@ -1,0 +1,46 @@
+{
+  "version": 2,
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "/api/:path*" },
+    { "source": "/:term.ttl", "destination": "/:term.ttl" },
+    { "source": "/terms/:term.ttl", "destination": "/terms/:term.ttl" },
+    { "source": "/:term.jsonld", "destination": "/:term.jsonld" },
+    { "source": "/terms/:term.jsonld", "destination": "/terms/:term.jsonld" },
+    { "source": "/:term.rdf", "destination": "/:term.rdf" },
+    { "source": "/terms/:term.rdf", "destination": "/terms/:term.rdf" },
+    { "source": "/:term.nt", "destination": "/:term.nt" },
+    { "source": "/terms/:term.nt", "destination": "/terms/:term.nt" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)\\.ttl",
+      "headers": [
+        { "key": "Content-Type", "value": "text/turtle" },
+        { "key": "Access-Control-Allow-Origin", "value": "*" }
+      ]
+    },
+    {
+      "source": "/(.*)\\.jsonld",
+      "headers": [
+        { "key": "Content-Type", "value": "application/ld+json" },
+        { "key": "Access-Control-Allow-Origin", "value": "*" }
+      ]
+    },
+    {
+      "source": "/(.*)\\.rdf",
+      "headers": [
+        { "key": "Content-Type", "value": "application/rdf+xml" },
+        { "key": "Access-Control-Allow-Origin", "value": "*" }
+      ]
+    },
+    {
+      "source": "/(.*)\\.nt",
+      "headers": [
+        { "key": "Content-Type", "value": "application/n-triples" },
+        { "key": "Access-Control-Allow-Origin", "value": "*" }
+      ]
+    }
+  ]
+}

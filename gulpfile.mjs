@@ -2,7 +2,7 @@ import gulp from 'gulp';
 import nunjucks from 'nunjucks';
 import gnj from 'gulp-nunjucks';
 import gulpSass from 'gulp-sass';
-import * as sass from 'sass';
+import sass from 'sass';
 import concat from 'gulp-concat';
 import cleancss from 'gulp-clean-css';
 import uglify from 'gulp-uglify';
@@ -11,8 +11,7 @@ import fs from 'fs';
 import browserSync from 'browser-sync';
 import yaml from 'yamljs';
 import hljs from 'highlight.js';
-// import del from 'del';
-import { deleteAsync as del } from 'del';
+import * as del from 'del'; // Changed to import all exports from del
 import { exec } from 'child_process';
 
 const scss = gulpSass(sass);
@@ -104,7 +103,7 @@ function images() {
 }
 
 function resetSchema() {
-    return del([
+    return del.deleteAsync([
         './src/views/pages/**/*',
         '!./src/views/pages',
         '!./src/views/pages/docs/**',
@@ -126,7 +125,7 @@ async function buildSchema() {
     });
 
     const createPropertyTemplate = p => {
-        del([`./src/views/pages/${p}`]);
+        del.deleteAsync([`./src/views/pages/${p}`]);
         return new Promise((resolve, reject) => {
             fs.access(`./src/views/pages/${p}`, err => {
                 if (err) fs.mkdirSync(`./src/views/pages/${p}`);
@@ -171,27 +170,16 @@ function turtle(done) {
     });
 }
 
-function configFiles() {
-    return gulp.src('./_config.yml')
-        .pipe(gulp.dest('./dist'));
-}
-
-function htaccess() {
-    return gulp.src('./src/views/pages/.htaccess')
-        .pipe(gulp.dest('./dist'));
+function debugPage() {
+    return gulp.src('./src/views/pages/debug.html', { allowEmpty: true })
+        .pipe(gulp.dest('./dist/'));
 }
 
 function watch() {
     gulp.watch('./src/scss/**/*.scss', styles);
     gulp.watch('./src/js/*.js', js);
     gulp.watch('./src/config/**/*.yml', template);
-    // Exclude automatically generated class and property files to avoid recursion
-    gulp.watch([
-        './src/views/**/*.njk', 
-        '!./src/views/pages/**/index.njk', // Exclude generated index.njk files
-        './src/views/pages/index.njk', // But include the main index.njk
-        './src/views/pages/docs/**/*.njk' // And include documentation pages
-    ], template);
+    gulp.watch('./src/views/**/*.njk', template);
 }
 
 function browserSyncServer() {
@@ -207,11 +195,11 @@ const assets = gulp.parallel(styles, js, fonts, images);
 const build = gulp.series(
   resetSchema,
   buildSchema,
-  gulp.parallel(styles, js, fonts, images, buildTemplates, turtle, htaccess, configFiles)
+  gulp.parallel(styles, js, fonts, images, buildTemplates, turtle, debugPage)
 );
 
 // Export build along with existing tasks
-export { resetSchema, buildSchema, template, build, htaccess, configFiles };
+export { resetSchema, buildSchema, template, build, debugPage };
 
 // Other exports remain unchanged
 export const clearSchema = resetSchema;

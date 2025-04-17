@@ -1,22 +1,38 @@
 <div class="card">
   <div class="card-content">
     <span class="card-title">Machine-readable formats</span>
-    <p>This term is available in Turtle format:</p>
+    <p>This term is available in the following machine-readable formats:</p>
     
     <div class="section">
       <h5>Turtle</h5>
-      <p>Access the Turtle (.ttl) representation using one of these methods:</p>
+      <p>Access the Turtle (.ttl) representation:</p>
       
-      <h6>Direct Link</h6>
       <p><a href="/terms/{{ objName }}.ttl" class="btn waves-effect waves-light blue-grey lighten-1">View as Turtle</a></p>
       <pre><code class="language-bash">curl https://oerschema.org/terms/{{ objName }}.ttl</code></pre>
+    </div>
+    
+    <div class="section">
+      <h5>JSON-LD</h5>
+      <p>Access the JSON-LD representation:</p>
       
-      <h6>URL Parameter</h6>
-      <p>Append <code>?format=ttl</code> to the term URL:</p>
-      <pre><code class="language-bash">curl https://oerschema.org/{{ objName }}?format=ttl</code></pre>
+      <p><a href="/terms/{{ objName }}.jsonld" class="btn waves-effect waves-light blue-grey lighten-1">View as JSON-LD</a></p>
+      <pre><code class="language-bash">curl https://oerschema.org/terms/{{ objName }}.jsonld</code></pre>
+    </div>
+    
+    <div class="section">
+      <h5>RDF/XML</h5>
+      <p>Access the RDF/XML (.rdf) representation:</p>
       
-      <p class="note"><i class="material-icons tiny">info</i> Note: While true content negotiation (using Accept headers) is not available on GitHub Pages, 
-      you can access the Turtle representation using either the direct link above or the URL parameter approach.</p>
+      <p><a href="/terms/{{ objName }}.rdf" class="btn waves-effect waves-light blue-grey lighten-1">View as RDF/XML</a></p>
+      <pre><code class="language-bash">curl https://oerschema.org/terms/{{ objName }}.rdf</code></pre>
+    </div>
+    
+    <div class="section">
+      <h5>N-Triples</h5>
+      <p>Access the N-Triples (.nt) representation:</p>
+      
+      <p><a href="/terms/{{ objName }}.nt" class="btn waves-effect waves-light blue-grey lighten-1">View as N-Triples</a></p>
+      <pre><code class="language-bash">curl https://oerschema.org/terms/{{ objName }}.nt</code></pre>
     </div>
   </div>
 </div>
