@@ -34,5 +34,35 @@
       <p><a href="/terms/{{ objName }}.nt" class="btn waves-effect waves-light blue-grey lighten-1">View as N-Triples</a></p>
       <pre><code class="language-bash">curl https://oerschema.org/terms/{{ objName }}.nt</code></pre>
     </div>
+    
+    <div class="section">
+      <h5>Content Negotiation</h5>
+      <p>OER Schema supports <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Content_negotiation" target="_blank">HTTP content negotiation</a>. You can request different representations of this term by specifying the appropriate Accept header:</p>
+      
+      <h6>Examples:</h6>
+      
+      <p>Request Turtle format:</p>
+      <pre><code class="language-bash">curl -LH "Accept: text/turtle" https://oerschema.org/{{ objName }}</code></pre>
+      
+      <p>Request JSON-LD format:</p>
+      <pre><code class="language-bash">curl -LH "Accept: application/ld+json" https://oerschema.org/{{ objName }}</code></pre>
+      
+      <p>Request RDF/XML format:</p>
+      <pre><code class="language-bash">curl -LH "Accept: application/rdf+xml" https://oerschema.org/{{ objName }}</code></pre>
+      
+      <p>Request N-Triples format:</p>
+      <pre><code class="language-bash">curl -LH "Accept: application/n-triples" https://oerschema.org/{{ objName }}</code></pre>
+    </div>
+
+    <div class="section">
+      <h5>Complete Vocabulary</h5>
+      <p>The complete vocabulary is available in various formats at the following URLs:</p>
+      <ul>
+        <li><a href="/schema.ttl">Turtle (.ttl)</a></li>
+        <li><a href="/schema.jsonld">JSON-LD (.jsonld)</a></li>
+        <li><a href="/schema.rdf">RDF/XML (.rdf)</a></li>
+        <li><a href="/schema.nt">N-Triples (.nt)</a></li>
+      </ul>
+    </div>
   </div>
 </div>
