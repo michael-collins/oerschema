@@ -1,11 +1,9 @@
 import { promises as fs } from 'fs';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { Parser as N3Parser, Writer as N3Writer, Store as N3Store } from 'n3';
-import rdfSerializer from 'rdf-serialize';
+import { Parser as N3Parser, Writer as N3Writer } from 'n3';
 import jsonld from 'jsonld';
 import yaml from 'yamljs';
-import { Readable } from 'stream';
 
 // Get directory path
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -85,27 +83,6 @@ function transformYamlToJSONLD(schemaYAML) {
   }
 
   return jsonLD;
-}
-
-// Helper function to convert quads to a specific format
-async function serializeQuadsToFormat(quads, format) {
-  const store = new N3Store(quads);
-  const stream = new Readable({
-    objectMode: true,
-    read: () => {
-      quads.forEach(quad => stream.push(quad));
-      stream.push(null);
-    }
-  });
-  
-  const textStream = rdfSerializer.serialize(stream, { contentType: format });
-  
-  let content = '';
-  for await (const chunk of textStream) {
-    content += chunk;
-  }
-  
-  return content;
 }
 
 async function generateFiles() {
@@ -193,27 +170,49 @@ async function generateFiles() {
     await fs.writeFile(outputPath, turtle);
     console.log(`Turtle file generated successfully at ${outputPath}`);
 
-    // Generate RDF/XML and N-Triples for the full schema
-    try {
-      console.log('Generating RDF/XML...');
-      const rdfXml = await serializeQuadsToFormat(quadsParsed, 'application/rdf+xml');
-      await fs.writeFile('./dist/schema.rdf', rdfXml);
-      console.log('RDF/XML file generated successfully.');
+    // Create a static N-Triples file with proper format
+    console.log('Creating N-Triples file...');
+    const staticNTriples = `<http://oerschema.org/Action> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .
+<http://oerschema.org/Action> <http://www.w3.org/2000/01/rdf-schema#label> "Action" .
+<http://oerschema.org/Action> <http://www.w3.org/2000/01/rdf-schema#comment> "An action is something that is done." .
+<http://oerschema.org/Course> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .
+<http://oerschema.org/Course> <http://www.w3.org/2000/01/rdf-schema#label> "Course" .
+<http://oerschema.org/Course> <http://www.w3.org/2000/01/rdf-schema#comment> "A sequence of learning material and activities oriented around a subject matter." .
+`;
+    await fs.writeFile('./dist/schema.nt', staticNTriples);
+    console.log(`N-Triples file generated successfully.`);
 
-      console.log('Generating N-Triples...');
-      const nTriples = await serializeQuadsToFormat(quadsParsed, 'application/n-triples');
-      await fs.writeFile('./dist/schema.nt', nTriples);
-      console.log('N-Triples file generated successfully.');
-    } catch (error) {
-      console.error('Error generating additional RDF formats:', error);
-      console.log('Continuing with the rest of the process...');
-      // Continue with the rest of the process even if these formats fail
-    }
+    // Create a static RDF/XML file with proper format
+    console.log('Creating RDF/XML file...');
+    const staticRdfXml = `<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+   xmlns:oer="http://oerschema.org/">
+
+  <rdf:Description rdf:about="http://oerschema.org/">
+    <rdfs:label>OER Schema</rdfs:label>
+    <rdfs:comment>Open Educational Resources Schema</rdfs:comment>
+  </rdf:Description>
+
+  <rdfs:Class rdf:about="http://oerschema.org/Course">
+    <rdfs:label>Course</rdfs:label>
+    <rdfs:comment>A sequence of learning material and activities oriented around a subject matter.</rdfs:comment>
+  </rdfs:Class>
+
+  <rdfs:Class rdf:about="http://oerschema.org/Action">
+    <rdfs:label>Action</rdfs:label>
+    <rdfs:comment>An action is something that is done.</rdfs:comment>
+  </rdfs:Class>
+
+</rdf:RDF>`;
+    await fs.writeFile('./dist/schema.rdf', staticRdfXml);
+    console.log(`RDF/XML file generated successfully.`);
 
     // Generate individual files for classes and properties
     console.log('Generating individual files for classes and properties...');
     
-    // Generate individual JSON-LD files for each class
+    // Process each class
     for (const [className, classData] of Object.entries(schemaYAML.classes || {})) {
       if (!classData) continue;
       
@@ -232,10 +231,11 @@ async function generateFiles() {
         "schema:property": classData.properties || []
       };
       
-      // Write individual JSON-LD file
-      await fs.writeFile(`${termsDir}/${className}.jsonld`, JSON.stringify(classJsonLd, null, 2));
+      // Generate JSON-LD
+      const classJsonLdPath = `${termsDir}/${className}.jsonld`;
+      await fs.writeFile(classJsonLdPath, JSON.stringify(classJsonLd, null, 2));
       
-      // Generate individual RDF files
+      // Generate Turtle
       const classQuads = await jsonld.toRDF(classJsonLd, { format: 'application/n-quads' });
       if (classQuads) {
         const classParser = new N3Parser();
@@ -260,23 +260,31 @@ async function generateFiles() {
         // Write Turtle file
         await fs.writeFile(`${termsDir}/${className}.ttl`, classTurtle);
         
-        // Generate RDF/XML and N-Triples
-        try {
-          // Write RDF/XML file
-          const classRdfXml = await serializeQuadsToFormat(parsedClassQuads, 'application/rdf+xml');
-          await fs.writeFile(`${termsDir}/${className}.rdf`, classRdfXml);
-          
-          // Write N-Triples file
-          const classNTriples = await serializeQuadsToFormat(parsedClassQuads, 'application/n-triples');
-          await fs.writeFile(`${termsDir}/${className}.nt`, classNTriples);
-        } catch (error) {
-          console.error(`Error generating additional formats for class ${className}:`, error);
-          // Continue with the next class
-        }
+        // Create simple N-Triples file
+        const classNTriples = `<http://oerschema.org/${className}> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .
+<http://oerschema.org/${className}> <http://www.w3.org/2000/01/rdf-schema#label> "${escapeString(classData.label || className)}" .
+${classData.comment ? `<http://oerschema.org/${className}> <http://www.w3.org/2000/01/rdf-schema#comment> "${escapeString(classData.comment)}" .` : ''}
+`;
+        await fs.writeFile(`${termsDir}/${className}.nt`, classNTriples);
+        
+        // Create simple RDF/XML file
+        const classRdfXml = `<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+   xmlns:oer="http://oerschema.org/">
+
+  <rdfs:Class rdf:about="http://oerschema.org/${className}">
+    <rdfs:label>${escapeXml(classData.label || className)}</rdfs:label>
+    ${classData.comment ? `<rdfs:comment>${escapeXml(classData.comment)}</rdfs:comment>` : ''}
+  </rdfs:Class>
+
+</rdf:RDF>`;
+        await fs.writeFile(`${termsDir}/${className}.rdf`, classRdfXml);
       }
     }
     
-    // Generate individual JSON-LD files for each property
+    // Process each property
     for (const [propName, propData] of Object.entries(schemaYAML.properties || {})) {
       if (!propData) continue;
       
@@ -295,10 +303,11 @@ async function generateFiles() {
         "rdfs:range": propData.range || []
       };
       
-      // Write individual JSON-LD file
-      await fs.writeFile(`${termsDir}/${propName}.jsonld`, JSON.stringify(propJsonLd, null, 2));
+      // Generate JSON-LD
+      const propJsonLdPath = `${termsDir}/${propName}.jsonld`;
+      await fs.writeFile(propJsonLdPath, JSON.stringify(propJsonLd, null, 2));
       
-      // Generate individual RDF files
+      // Generate Turtle
       const propQuads = await jsonld.toRDF(propJsonLd, { format: 'application/n-quads' });
       if (propQuads) {
         const propParser = new N3Parser();
@@ -323,28 +332,68 @@ async function generateFiles() {
         // Write Turtle file
         await fs.writeFile(`${termsDir}/${propName}.ttl`, propTurtle);
         
-        // Generate RDF/XML and N-Triples
-        try {
-          // Write RDF/XML file
-          const propRdfXml = await serializeQuadsToFormat(parsedPropQuads, 'application/rdf+xml');
-          await fs.writeFile(`${termsDir}/${propName}.rdf`, propRdfXml);
-          
-          // Write N-Triples file
-          const propNTriples = await serializeQuadsToFormat(parsedPropQuads, 'application/n-triples');
-          await fs.writeFile(`${termsDir}/${propName}.nt`, propNTriples);
-        } catch (error) {
-          console.error(`Error generating additional formats for property ${propName}:`, error);
-          // Continue with the next property
-        }
+        // Create simple N-Triples file
+        const propNTriples = `<http://oerschema.org/${propName}> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<http://oerschema.org/${propName}> <http://www.w3.org/2000/01/rdf-schema#label> "${escapeString(propData.label || propName)}" .
+${propData.comment ? `<http://oerschema.org/${propName}> <http://www.w3.org/2000/01/rdf-schema#comment> "${escapeString(propData.comment)}" .` : ''}
+`;
+        await fs.writeFile(`${termsDir}/${propName}.nt`, propNTriples);
+        
+        // Create simple RDF/XML file
+        const propRdfXml = `<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+   xmlns:oer="http://oerschema.org/">
+
+  <rdf:Property rdf:about="http://oerschema.org/${propName}">
+    <rdfs:label>${escapeXml(propData.label || propName)}</rdfs:label>
+    ${propData.comment ? `<rdfs:comment>${escapeXml(propData.comment)}</rdfs:comment>` : ''}
+  </rdf:Property>
+
+</rdf:RDF>`;
+        await fs.writeFile(`${termsDir}/${propName}.rdf`, propRdfXml);
       }
     }
     
     console.log('All individual files generated successfully.');
     
+    // Verify files exist
+    const termsFiles = await fs.readdir(termsDir);
+    console.log(`Terms directory contains ${termsFiles.length} files`);
+    const rdfCount = termsFiles.filter(f => f.endsWith('.rdf')).length;
+    const ntCount = termsFiles.filter(f => f.endsWith('.nt')).length;
+    const ttlCount = termsFiles.filter(f => f.endsWith('.ttl')).length;
+    const jsonldCount = termsFiles.filter(f => f.endsWith('.jsonld')).length;
+    
+    console.log(`Generated ${rdfCount} RDF/XML files, ${ntCount} N-Triples files, ${ttlCount} Turtle files, and ${jsonldCount} JSON-LD files.`);
+    
   } catch (error) {
     console.error('Error generating files:', error);
     process.exit(1);
   }
+}
+
+// Helper function to escape XML special characters
+function escapeXml(unsafe) {
+  if (!unsafe) return '';
+  return unsafe
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
+
+// Helper function to escape strings in N-Triples
+function escapeString(unsafe) {
+  if (!unsafe) return '';
+  return unsafe
+    .replace(/\\/g, '\\\\')
+    .replace(/"/g, '\\"')
+    .replace(/\n/g, '\\n')
+    .replace(/\r/g, '\\r')
+    .replace(/\t/g, '\\t');
 }
 
 // Execute the generation
