@@ -19,20 +19,25 @@
   "author": "Alex Boyce <curiosity26@gmail.com>",
   "license": "SEE LICENSE IN LICENSE",
   "devDependencies": {
+    "autoprefixer": "^10.4.21",
     "browser-sync": "^3.0.3",
+    "daisyui": "^5.0.23",
     "del": "^8.0.0",
     "gulp": "^5.0.0",
     "gulp-clean-css": "^4.3.0",
     "gulp-concat": "^2.6.1",
     "gulp-nunjucks-render": "^2.2.3",
     "gulp-plumber": "^1.2.1",
+    "gulp-postcss": "^10.0.0",
     "gulp-rename": "^2.0.0",
     "gulp-sass": "^5.1.0",
     "gulp-uglify": "^3.0.2",
     "jsonld": "^8.3.2",
     "n3": "^1.22.3",
+    "postcss": "^8.5.3",
     "rdf-serialize": "^2.2.2",
     "sass": "^1.80.6",
+    "tailwindcss": "^4.1.4",
     "yamljs": "^0.3.0"
   }
 }

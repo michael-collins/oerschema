@@ -14,6 +14,9 @@ import yaml from 'yamljs';
 import hljs from 'highlight.js';
 import * as del from 'del'; // Changed to import all exports from del
 import { exec } from 'child_process';
+import postcss from 'gulp-postcss';
+import tailwindcss from 'tailwindcss';
+import autoprefixer from 'autoprefixer';
 
 const scss = gulpSass(sass);
 const bs = browserSync.create();
@@ -73,29 +76,35 @@ env.addExtension('NunjucksCodeHighlight', highlight)
     .addFilter('empty', arr => !arr || arr.length === 0)
     .addFilter('fileExists', (path, cb) => fs.access(path, err => cb(!err)), true);
 
+// Updated styles function to process Tailwind CSS with proper error handling
 function styles() {
-    return gulp.src('./src/scss/style.scss')
-        .pipe(scss({ includePaths: ['./src/scss/'] }).on('error', scss.logError))
+    return gulp.src('./src/scss/tailwind.css')
+        .pipe(postcss([
+            tailwindcss,
+            autoprefixer
+        ]))
+        .on('error', function(err) {
+            console.error('PostCSS error:', err.message);
+            this.emit('end');
+        })
         .pipe(cleancss())
-        .pipe(rename({ extname: ".min.css" }))
+        .pipe(rename({ basename: "style", extname: ".min.css" }))
         .pipe(gulp.dest('./dist/assets/css/'));
 }
 
+// Updated JS function to remove Materialize
 function js() {
     return gulp.src([
-        './src/components/jquery/dist/jquery.js',
-        './src/components/angular/angular.js',
-        './src/components/materialize/dist/js/materialize.js',
-        './src/js/*.js'
+        './src/js/*.js' // Remove materialize and jQuery dependencies
     ])
         .pipe(concat('bundle.min.js'))
         .pipe(uglify())
         .pipe(gulp.dest('./dist/assets/js/'));
 }
 
-function fonts() {
-    return gulp.src('./src/components/materialize/fonts/**')
-        .pipe(gulp.dest('./dist/assets/fonts'));
+// Remove fonts function since we're not using Materialize fonts
+function fonts(done) {
+    done(); // No-op function
 }
 
 // Binary-safe image copy function
@@ -181,7 +190,8 @@ function buildTemplates() {
     const data = {
         stylesheets: ['style.min.css'],
         scripts: ['bundle.min.js'],
-        schema: yaml.load('./src/config/schema.yml')
+        schema: yaml.load('./src/config/schema.yml'),
+        theme: 'oerschema' // Set default DaisyUI theme
     };
 
     return gulp.src('./src/views/pages/**/*.njk')
@@ -208,8 +218,10 @@ function debugPage() {
 }
 
 function watch() {
+    gulp.watch('./src/scss/**/*.css', styles); // Watch CSS files too
     gulp.watch('./src/scss/**/*.scss', styles);
     gulp.watch('./src/js/*.js', js);
+    gulp.watch('./tailwind.config.js', styles); // Watch Tailwind config
     gulp.watch('./src/config/**/*.yml', template);
     gulp.watch('./src/views/**/*.njk', template);
     gulp.watch('./src/images/**/*', images);
@@ -224,11 +236,11 @@ function browserSyncServer() {
     });
 }
 const template = gulp.series(resetSchema, buildSchema, buildTemplates);
-const assets = gulp.parallel(styles, js, fonts, images);
+const assets = gulp.parallel(styles, js, images); // Removed fonts task
 const build = gulp.series(
   resetSchema,
   buildSchema,
-  gulp.parallel(styles, js, fonts, images, buildTemplates, turtle, debugPage)
+  gulp.parallel(styles, js, images, buildTemplates, turtle, debugPage)
 );
 
 // Export build along with existing tasks

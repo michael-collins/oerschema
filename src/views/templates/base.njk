@@ -1,22 +1,24 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" {% if ng_app %}ng-app="{{ ng_app}}"{% endif %}>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" 
+      {% if ng_app %}ng-app="{{ ng_app }}"{% endif %}
+      data-theme="{{ theme|default('oerschema') }}" 
+      class="bg-base-100">
     <head>
         <meta charset="UTF-8">
         <title>{%- block title %}{{ title|append(' | Open Educational Resource Schema') }}{% endblock title -%}</title>
         <meta name="viewport" content="width=device-width,initial-scale=1">
         {% block stylesheets -%}
-            <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-            <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet">
+            <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
             {% for sheet in stylesheets %}
                 <link rel="stylesheet" type="text/css" href="/assets/css/{{ sheet }}">
             {% endfor %}
         {%- endblock stylesheets %}
     </head>
-    <body {% if ng_body_controller %}ng-controller="{{ ng_body_controller }}"{% endif %}>
+    <body {% if ng_body_controller %}ng-controller="{{ ng_body_controller }}"{% endif %} class="min-h-screen flex flex-col">
         {% block nav -%}
             {% include "templates/nav.njk" %}
         {% endblock nav -%}
-        <main>
+        <main class="container mx-auto px-4 py-6 flex-grow">
             {%- block content %}{% endblock content -%}
         </main>
         {% include 'templates/footer.njk' %}
@@ -24,6 +26,12 @@
             {% for script in scripts %}
                 <script src="/assets/js/{{ script }}"></script>
             {% endfor %}
+            <!-- Initialize theme if needed -->
+            <script>
+                // Check for saved theme preference
+                const savedTheme = localStorage.getItem('theme') || '{{ theme|default("oerschema") }}';
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            </script>
         {%- endblock javascripts %}
     </body>
 </html>
