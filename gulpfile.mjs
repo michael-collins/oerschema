@@ -8,6 +8,7 @@ import cleancss from 'gulp-clean-css';
 import uglify from 'gulp-uglify';
 import rename from 'gulp-rename';
 import fs from 'fs';
+import path from 'path';
 import browserSync from 'browser-sync';
 import yaml from 'yamljs';
 import hljs from 'highlight.js';
@@ -97,9 +98,40 @@ function fonts() {
         .pipe(gulp.dest('./dist/assets/fonts'));
 }
 
-function images() {
-    return gulp.src('src/images/**')
-        .pipe(gulp.dest('dist/assets/images'));
+// Binary-safe image copy function
+async function copyImagesDirectly() {
+    const sourceDir = './src/images';
+    const destDir = './dist/assets/images';
+    
+    // Ensure destination directory exists
+    if (!fs.existsSync(destDir)) {
+        fs.mkdirSync(destDir, { recursive: true });
+    }
+    
+    // Get all files from source directory
+    const files = fs.readdirSync(sourceDir);
+    
+    // Copy each file directly using fs.copyFile
+    for (const file of files) {
+        // Skip hidden files like .DS_Store
+        if (file.startsWith('.')) continue;
+        
+        const sourcePath = path.join(sourceDir, file);
+        const destPath = path.join(destDir, file);
+        
+        // Only copy files (not directories)
+        if (fs.statSync(sourcePath).isFile()) {
+            console.log(`Copying ${sourcePath} to ${destPath}`);
+            await fs.promises.copyFile(sourcePath, destPath);
+        }
+    }
+    
+    return Promise.resolve();
+}
+
+// Replace the existing images function with our new one
+function images(done) {
+    copyImagesDirectly().then(() => done()).catch(err => done(err));
 }
 
 function resetSchema() {
@@ -180,6 +212,7 @@ function watch() {
     gulp.watch('./src/js/*.js', js);
     gulp.watch('./src/config/**/*.yml', template);
     gulp.watch('./src/views/**/*.njk', template);
+    gulp.watch('./src/images/**/*', images);
 }
 
 function browserSyncServer() {
